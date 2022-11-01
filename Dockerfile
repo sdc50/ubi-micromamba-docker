@@ -1,15 +1,15 @@
-ARG BASE_IMAGE=debian:bullseye-slim
+ARG BASE_IMAGE=redhat/ubi8
 
 # Mutli-stage build to keep final image small. Otherwise end up with
 # curl and openssl installed
 FROM --platform=$BUILDPLATFORM $BASE_IMAGE AS stage1
 ARG VERSION=0.27.0
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN dnf update -y && dnf install -y \
     bzip2 \
     ca-certificates \
     curl \
-    && rm -rf /var/lib/apt /var/lib/dpkg /var/lib/cache /var/lib/log
+    && dnf clean all
 ARG TARGETARCH
 RUN test "$TARGETARCH" = 'amd64' && export ARCH='64'; \
     test "$TARGETARCH" = 'arm64' && export ARCH='aarch64'; \
@@ -24,7 +24,7 @@ ENV ENV_NAME="base"
 ENV MAMBA_ROOT_PREFIX="/opt/conda"
 ENV MAMBA_EXE="/bin/micromamba"
 
-COPY --from=stage1 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=stage1 /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-bundle.crt
 COPY --from=stage1 /tmp/bin/micromamba "$MAMBA_EXE"
 
 ARG MAMBA_USER=mambauser
