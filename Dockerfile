@@ -3,7 +3,7 @@ ARG BASE_IMAGE=redhat/ubi8
 # Mutli-stage build to keep final image small. Otherwise end up with
 # curl and openssl installed
 FROM --platform=$BUILDPLATFORM $BASE_IMAGE AS stage1
-ARG VERSION=0.27.0
+ARG VERSION=1.4.7
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN dnf update -y && dnf install -y \
     bzip2 \
